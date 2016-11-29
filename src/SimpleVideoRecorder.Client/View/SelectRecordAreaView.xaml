@@ -1,0 +1,87 @@
+﻿<Window
+    x:Class="SimpleVideoRecorder.Client.View.SelectRecordAreaView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:SimpleVideoRecorder.Client.Behaviors"
+    xmlns:builtInConverters="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+    xmlns:converters="clr-namespace:SimpleVideoRecorder.Client.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:local="clr-namespace:SimpleVideoRecorder.Client.View"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tb="http://www.hardcodet.net/taskbar"
+    Width="300"
+    Height="300"
+    AllowsTransparency="True"
+    ShowInTaskbar="False"
+    WindowState="Maximized"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <Window.Background>
+        <SolidColorBrush Opacity="0.01" Color="White" />
+    </Window.Background>
+    <Window.Resources>
+        <builtInConverters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:BooleanToTrayIconConverter x:Key="BooleanToTrayIconConverter" />
+        <converters:BooleanToInvertedBooleanConverter x:Key="BooleanToInvertedBooleanConverter" />
+
+        <ContextMenu x:Key="TrayContextMenu">
+            <MenuItem
+                Command="{Binding StopActiveRecordCommand}"
+                Header="Stop Recording"
+                IsEnabled="{Binding IsRecording}" />
+            <Separator />
+            <MenuItem
+                Command="{Binding ShowSelectionFormCommand}"
+                Header="Capture Area"
+                IsEnabled="{Binding IsRecording, Converter={StaticResource BooleanToInvertedBooleanConverter}}" />
+            <Separator />
+            <MenuItem Command="{Binding ShowSettingsCommand}" Header="Settings" />
+            <Separator />
+            <MenuItem Command="{Binding ExitApplicationCommand}" Header="Exit" />
+        </ContextMenu>
+    </Window.Resources>
+    <Window.Visibility>
+        <Binding
+            Converter="{StaticResource BooleanToVisibilityConverter}"
+            Mode="TwoWay"
+            Path="IsVisible" />
+    </Window.Visibility>
+    <i:Interaction.Behaviors>
+        <behaviors:ShowSelectionRectangleBehavior />
+    </i:Interaction.Behaviors>
+    <Grid>
+        <tb:TaskbarIcon
+            ContextMenu="{StaticResource TrayContextMenu}"
+            IconSource="{Binding IsRecording, Converter={StaticResource BooleanToTrayIconConverter}}"
+            MenuActivation="LeftOrRightClick"
+            Visibility="Visible">
+            <tb:TaskbarIcon.TrayToolTip>
+                <Border
+                    Background="White"
+                    BorderBrush="Black"
+                    BorderThickness="1"
+                    CornerRadius="3">
+                    <StackPanel>
+                        <Label Content="Simple Video Recorder" />
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Status: " />
+                            <Label Content="{Binding StatusText}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </tb:TaskbarIcon.TrayToolTip>
+        </tb:TaskbarIcon>
+
+        <Canvas>
+            <Rectangle
+                x:Name="MouseSelection"
+                Fill="#77FFFFFF"
+                Stroke="DarkOrange"
+                Visibility="Collapsed" />
+        </Canvas>
+    </Grid>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding HideSelectionViewCommand}" Gesture="Esc" />
+    </Window.InputBindings>
+</Window>
